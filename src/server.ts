@@ -1,6 +1,6 @@
 import express, { Express, Request, Response } from 'express';
 import dotenv from 'dotenv';
-import indexRouter from './routes/index.router';
+import randomOptionRoutes from './routes/RandomOption.router';
 
 dotenv.config();
 
@@ -20,7 +20,7 @@ class Server {
   }
 
   routes() {
-    this.app.use('/api', indexRouter);
+    this.app.use('/api', randomOptionRoutes);
   }
 
   start() {
