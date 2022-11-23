@@ -17,6 +17,7 @@ git clone https://github.com/KevinJoseph/test-vca.git
 - Install dependencies
 ```
 cd test-vca
+configure the file .env whit the variables enveroment
 npm install
 npm run dev
 ```
