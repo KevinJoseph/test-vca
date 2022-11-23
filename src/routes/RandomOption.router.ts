@@ -1,11 +1,10 @@
 import { Router } from 'express';
 import { RandomOptionController } from '../controllers/RandomOptionController';
-import { AuthController } from '../controllers/AuthController';
+import { TokenValidation } from '../middlewares/verifyToken';
 
-class RandomOptionRoutes {
+export class RandomOptionRoutes {
   public router: Router;
   public randomOptionController: RandomOptionController = new RandomOptionController();
-  public authController: AuthController = new AuthController();
 
   constructor() {
     this.router = Router();
@@ -13,20 +12,7 @@ class RandomOptionRoutes {
   }
 
   routes() {
-    this.router.get(
-      '/option',
-      this.authController.authenticateJWT,
-      this.randomOptionController.info,
-    );
-    this.router.post(
-      '/option',
-      this.authController.authenticateJWT,
-      this.randomOptionController.chooseRandomOption,
-    );
+    this.router.get('/option', TokenValidation, this.randomOptionController.info);
+    this.router.post('/option', TokenValidation, this.randomOptionController.chooseRandomOption);
   }
 }
-
-const randomOptionRoutes = new RandomOptionRoutes();
-randomOptionRoutes.routes();
-
-export default randomOptionRoutes.router;
