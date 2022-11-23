@@ -1,6 +1,8 @@
 import express, { Express, Request, Response } from 'express';
+import { connect } from 'mongoose';
 import dotenv from 'dotenv';
 import randomOptionRoutes from './routes/RandomOption.router';
+import { UserRoutes } from './routes/User.router';
 
 dotenv.config();
 
@@ -17,10 +19,24 @@ class Server {
     this.app.set('port', process.env.PORT || 3000);
     this.app.use(express.json());
     this.routes();
+    this.mongo();
   }
 
   routes() {
     this.app.use('/api', randomOptionRoutes);
+    this.app.use('/api/user', new UserRoutes().router);
+  }
+
+  private mongo() {
+    connect(process.env.MONGO_URI as string)
+      .then(() => {
+        console.log('[+] Database connected with Atlas Cluster');
+        return true;
+      })
+      .catch((err) => {
+        console.log(err);
+        return false;
+      });
   }
 
   start() {
