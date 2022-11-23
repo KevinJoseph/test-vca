@@ -1,7 +1,7 @@
 import express, { Express, Request, Response } from 'express';
 import { connect } from 'mongoose';
 import dotenv from 'dotenv';
-import randomOptionRoutes from './routes/RandomOption.router';
+import { RandomOptionRoutes } from './routes/RandomOption.router';
 import { UserRoutes } from './routes/User.router';
 
 dotenv.config();
@@ -23,8 +23,8 @@ class Server {
   }
 
   routes() {
-    this.app.use('/api', randomOptionRoutes);
-    this.app.use('/api/user', new UserRoutes().router);
+    this.app.use('/api', new RandomOptionRoutes().router);
+    this.app.use('/api', new UserRoutes().router);
   }
 
   private mongo() {
