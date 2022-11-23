@@ -43,6 +43,6 @@ export class AuthController {
 
     // Create a Token
     const token: string = jwt.sign({ _id: user._id }, 'secret' || '');
-    res.send(token);
+    res.send({ token: token });
   }
 }
