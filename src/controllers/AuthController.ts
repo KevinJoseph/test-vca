@@ -27,7 +27,7 @@ export class AuthController {
         expiresIn: 60 * 60 * 24,
       });
       // res.header('auth-token', token).json(token);
-      res.send(token);
+      res.send({ token: token });
     } catch (e) {
       res.status(400).json(e);
     }
