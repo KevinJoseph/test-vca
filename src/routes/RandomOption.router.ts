@@ -1,9 +1,11 @@
 import { Router } from 'express';
-import RandomOptionController from '../controllers/RandomOptionController';
-import { auth } from '../middlewares/auth';
+import { RandomOptionController } from '../controllers/RandomOptionController';
+import { AuthController } from '../controllers/AuthController';
 
 class RandomOptionRoutes {
   public router: Router;
+  public randomOptionController: RandomOptionController = new RandomOptionController();
+  public authController: AuthController = new AuthController();
 
   constructor() {
     this.router = Router();
@@ -11,8 +13,16 @@ class RandomOptionRoutes {
   }
 
   routes() {
-    this.router.get('/option', [auth], RandomOptionController.info);
-    this.router.post('/option', RandomOptionController.chooseRandomOption);
+    this.router.get(
+      '/option',
+      this.authController.authenticateJWT,
+      this.randomOptionController.info,
+    );
+    this.router.post(
+      '/option',
+      this.authController.authenticateJWT,
+      this.randomOptionController.chooseRandomOption,
+    );
   }
 }
 
