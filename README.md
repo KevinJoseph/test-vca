@@ -16,7 +16,7 @@ git clone https://github.com/KevinJoseph/test-vca.git
 ```
 - Install dependencies
 ```
-cd TESTVCA
+cd test-vca
 npm install
 npm run build
 ```
