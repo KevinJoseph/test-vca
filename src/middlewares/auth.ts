@@ -1,30 +1,51 @@
-import { Request, Response, NextFunction } from 'express';
-import * as jwt from 'jsonwebtoken';
+import passport from 'passport';
+import passportLocal from 'passport-local';
+import passportJwt from 'passport-jwt';
+import { User } from '../models/user';
 
-export const auth = (req: Request, res: Response, next: NextFunction) => {
-  //Get the jwt token from the head
-  const token = <string>req.headers.authorization;
-  console.log(token);
+const LocalStrategy = passportLocal.Strategy;
+const JwtStrategy = passportJwt.Strategy;
+const ExtractJwt = passportJwt.ExtractJwt;
 
-  let jwtPayload;
+passport.use(
+  new LocalStrategy({ usernameField: 'username' }, (username, password, done) => {
+    User.findOne({ username: username.toLowerCase() }, (err: any, user: any) => {
+      if (err) {
+        return done(err);
+      }
+      if (!user) {
+        return done(undefined, false, { message: `username ${username} not found.` });
+      }
+      user.comparePassword(password, (err: Error, isMatch: boolean) => {
+        if (err) {
+          return done(err);
+        }
+        if (isMatch) {
+          return done(undefined, user);
+        }
+        return done(undefined, false, { message: 'Invalid username or password.' });
+      });
+    });
+  }),
+);
 
-  //Try to validate the token and get data
-  try {
-    jwtPayload = <any>jwt.verify(token, process.env.JWTSECRET as string);
-    res.locals.jwtPayload = jwtPayload;
-  } catch (error) {
-    //If token is not valid, respond with 401 (unauthorized)
-    return res.status(401).json({ msg: 'Sin token, no tienes autorización' });
-  }
-
-  //The token is valid for 1 hour
-  //We want to send a new token on every request
-  const { userId, username } = jwtPayload;
-  const newToken = jwt.sign({ userId, username }, process.env.JWTSECRET as string, {
-    expiresIn: '1h',
-  });
-  res.setHeader('token', newToken);
-
-  //Call the next middleware or controller
-  next();
-};
+passport.use(
+  new JwtStrategy(
+    {
+      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      secretOrKey: 'secret',
+    },
+    function (jwtToken, done) {
+      User.findOne({ username: jwtToken.username }, function (err: any, user: any) {
+        if (err) {
+          return done(err, false);
+        }
+        if (user) {
+          return done(undefined, user, jwtToken);
+        } else {
+          return done(undefined, false);
+        }
+      });
+    },
+  ),
+);
