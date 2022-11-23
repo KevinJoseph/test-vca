@@ -1,4 +1,4 @@
-# AWS Node.js Typescript - TestapiREST
+# Node.js Typescript - Technical Test VCA
 
 This project implements an apiREST part of technical test VCA.
 
@@ -15,5 +15,5 @@ local:
 - npm install
 - npm run dev
 
-## Documentation
+## Documentation POSTMAN
 https://documenter.getpostman.com/view/5768800/2s8YsnYwx2
