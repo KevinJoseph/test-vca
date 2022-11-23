@@ -1,7 +1,7 @@
 import { Request, Response, Router } from 'express';
 import { RandomArray } from '../common/RandomArray/RandomArray';
 
-class RandomOptionController {
+export class RandomOptionController {
   async info(req: Request, res: Response) {
     return res.json('Please, you send a request post and add a body whit options');
   }
@@ -18,4 +18,3 @@ class RandomOptionController {
     res.json(result);
   }
 }
-export default new RandomOptionController();
