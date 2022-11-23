@@ -18,7 +18,7 @@ git clone https://github.com/KevinJoseph/test-vca.git
 ```
 cd test-vca
 npm install
-npm run build
+npm run dev
 ```
 
 ## Documentation POSTMAN
