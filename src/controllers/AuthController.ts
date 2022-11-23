@@ -1,39 +1,48 @@
-import { NextFunction, Request, Response } from 'express';
-import passport from 'passport';
-import '../middlewares/auth';
+import { Request, Response } from 'express';
+import User, { IUser } from '../models/User';
+import { signupValidation, signinValidation } from '../middlewares/joi';
+import jwt from 'jsonwebtoken';
 
 export class AuthController {
-  public authenticateJWT(req: Request, res: Response, next: NextFunction) {
-    passport.authenticate('jwt', function (err, user, info) {
-      if (err) {
-        console.log(err);
-        return res.status(401).json({ status: 'error', code: 'unauthorized' });
-      }
-      if (!user) {
-        return res.status(401).json({ status: 'error', code: 'unauthorized' });
-      } else {
-        return next();
-      }
-    })(req, res, next);
+  async signup(req: Request, res: Response) {
+    // Validation
+    const { error } = signupValidation(req.body);
+    if (error) return res.status(400).json(error.message);
+
+    // Email Validation
+    const emailExists = await User.findOne({ email: req.body.email });
+    if (emailExists) return res.status(400).json('Email already exists');
+
+    // Saving a new User
+    try {
+      const newUser: IUser = new User({
+        username: req.body.username,
+        email: req.body.email,
+        password: req.body.password,
+      });
+      newUser.password = await newUser.encrypPassword(newUser.password);
+      const savedUser = await newUser.save();
+
+      const token: string = jwt.sign({ _id: savedUser._id }, 'secret' || '', {
+        expiresIn: 60 * 60 * 24,
+      });
+      // res.header('auth-token', token).json(token);
+      res.send(token);
+    } catch (e) {
+      res.status(400).json(e);
+    }
   }
 
-  public authorizeJWT(req: Request, res: Response, next: NextFunction) {
-    passport.authenticate('jwt', function (err, user, jwtToken) {
-      if (err) {
-        console.log(err);
-        return res.status(401).json({ status: 'error', code: 'unauthorized' });
-      }
-      if (!user) {
-        return res.status(401).json({ status: 'error', code: 'unauthorized' });
-      } else {
-        const scope = req.baseUrl.split('/').slice(-1)[0];
-        const authScope = jwtToken.scope;
-        if (authScope && authScope.indexOf(scope) > -1) {
-          return next();
-        } else {
-          return res.status(401).json({ status: 'error', code: 'unauthorized' });
-        }
-      }
-    })(req, res, next);
+  async signin(req: Request, res: Response) {
+    const { error } = signinValidation(req.body);
+    if (error) return res.status(400).json(error.message);
+    const user = await User.findOne({ email: req.body.email });
+    if (!user) return res.status(400).json('Email or Password is wrong');
+    const correctPassword = await user.validatePassword(req.body.password);
+    if (!correctPassword) return res.status(400).json('Invalid Password');
+
+    // Create a Token
+    const token: string = jwt.sign({ _id: user._id }, 'secret' || '');
+    res.header('auth-token', token).json(token);
   }
 }
